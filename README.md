@@ -1,7 +1,7 @@
 
-  # Comprehensive Student Learning App
+  # Verbora
 
-  This is a code bundle for Comprehensive Student Learning App. 
+  This is a code bundle for Verbora. 
 
   ## Running the code
 

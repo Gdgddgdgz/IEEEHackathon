@@ -1,150 +1,201 @@
-import React, { useState, useEffect } from 'react';
-import { Home, BookOpen, Trophy, Settings, Users, BarChart3 } from 'lucide-react';
-import { HomePage } from './components/HomePage';
-import { GamesHub } from './components/GamesHub';
-import { ProgressPage } from './components/ProgressPage';
-import { TeacherPanel } from './components/TeacherPanel';
-import { SettingsPage } from './components/SettingsPage';
-import { LoginPage } from './components/LoginPage';
-import { initializeData, getUserProgress } from './utils/storage';
-import { LanguageProvider, useLanguage } from './utils/LanguageContext';
+import React, { useState, useEffect } from "react";
+import { Home, BookOpen, Trophy, Settings, BarChart3 } from "lucide-react";
 
-type Page = 'home' | 'games' | 'progress' | 'teacher' | 'settings';
+import { HomePage } from "./components/HomePage";
+import { GamesHub } from "./components/GamesHub";
+import { ProgressPage } from "./components/ProgressPage";
+import { TeacherPanel } from "./components/TeacherPanel";
+import { SettingsPage } from "./components/SettingsPage";
+import AuthCard from "./components/AuthCard";
 
+import { isAuthenticated, logout } from "./utils/auth";
+import { initializeData } from "./utils/storage";
+import { LanguageProvider, useLanguage } from "./utils/LanguageContext";
+
+export type Page = "home" | "games" | "progress" | "teacher" | "settings";
+type Role = "" | "student" | "teacher";
 
 function AppContent() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [currentPage, setCurrentPage] = useState<Page>("home");
+  const [role, setRole] = useState<Role>("");
   const [isTeacherMode, setIsTeacherMode] = useState(false);
-  const [role, setRole] = useState<'' | 'teacher' | 'student'>('');
   const [dark, setDark] = useState(false);
+  const [auth, setAuth] = useState<boolean>(isAuthenticated());
+
   const { t } = useLanguage();
 
   useEffect(() => {
     initializeData();
   }, []);
 
-  // Apply dark mode to <html> element
   useEffect(() => {
     const html = document.documentElement;
-    if (dark) {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
+    dark ? html.classList.add("dark") : html.classList.remove("dark");
   }, [dark]);
 
   const handleLogout = () => {
-    setRole('');
+    logout();
+    setAuth(false);
+    setRole("");
     setIsTeacherMode(false);
-    setCurrentPage('home');
+    setCurrentPage("home");
     setDark(false);
   };
 
-  if (!role) {
-    return <LoginPage onLogin={(r) => {
-      setRole(r);
-      setIsTeacherMode(r === 'teacher');
-      setCurrentPage('home');
-    }} />;
+  /* Auth Screen with professional card */
+  if (!auth) {
+    return (
+      <div className="flex flex-col items-center h-screen bg-gradient-to-br from-purple-200 via-indigo-200 to-pink-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
+        <div className="mt-16 w-full max-w-2xl p-10 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-3xl shadow-2xl border-4 border-purple-400 dark:border-purple-600">
+          <div className="flex flex-col items-center mb-6">
+            <h1 className="text-5xl font-extrabold text-purple-700 dark:text-purple-300">
+              Verbora
+            </h1>
+            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mt-2 text-center">
+              Learn meaning, not memorization
+            </p>
+          </div>
+          <AuthCard
+            onAuth={(r: "student" | "teacher") => {
+              setAuth(true);
+              setRole(r);
+              setIsTeacherMode(r === "teacher");
+              setCurrentPage("home");
+            }}
+          />
+        </div>
+      </div>
+    );
   }
+
+  /* Page Background Gradients */
+  const pageBg = () => {
+    switch (currentPage) {
+      case "home":
+        return "from-purple-100 via-pink-100 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700";
+      case "games":
+        return "from-blue-100 via-indigo-100 to-purple-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700";
+      case "progress":
+        return "from-green-100 via-lime-100 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700";
+      case "teacher":
+        return "from-red-100 via-orange-100 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700";
+      case "settings":
+        return "from-pink-100 via-purple-100 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700";
+      default:
+        return "from-purple-100 via-pink-100 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700";
+    }
+  };
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'home':
+      case "home":
         return <HomePage onNavigate={setCurrentPage} />;
-      case 'games':
+      case "games":
         return <GamesHub />;
-      case 'progress':
+      case "progress":
         return <ProgressPage />;
-      case 'teacher':
-        return role === 'teacher' ? <TeacherPanel /> : <HomePage onNavigate={setCurrentPage} />;
-      case 'settings':
-        return <SettingsPage isTeacherMode={isTeacherMode} setIsTeacherMode={setIsTeacherMode} dark={dark} setDark={setDark} onLogout={handleLogout} />;
+      case "teacher":
+        return role === "teacher" ? <TeacherPanel /> : <HomePage onNavigate={setCurrentPage} />;
+      case "settings":
+        return (
+          <SettingsPage
+            isTeacherMode={isTeacherMode}
+            setIsTeacherMode={setIsTeacherMode}
+            dark={dark}
+            setDark={setDark}
+            onLogout={handleLogout}
+          />
+        );
       default:
         return <HomePage onNavigate={setCurrentPage} />;
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 transition-colors duration-300">
+    <div className={`h-screen flex flex-col bg-gradient-to-br ${pageBg()} transition-colors duration-700`}>
       {/* Header */}
-      <header className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur border-b border-gray-200 dark:border-slate-700 shadow-sm sticky top-0 z-30">
-        <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center gap-3">
-          <img src="/logo192.png" alt="App Logo" className="h-8 w-8 rounded-lg shadow" style={{background:'#2a3cff'}} onError={e => (e.currentTarget as HTMLImageElement).style.display='none'} />
-          <span className="font-bold text-xl tracking-tight text-blue-700 dark:text-blue-200">Student Learning App</span>
-        </div>
+      <header className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 shadow-md flex items-center px-5 py-2">
+        <span className="font-extrabold text-2xl md:text-3xl text-purple-700 dark:text-purple-300">
+          Verbora
+        </span>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 pb-24 pt-4">
-        {renderPage()}
+      {/* Main */}
+      <main className="flex-1 flex items-center justify-center overflow-hidden">
+        <div className="flex-1 flex items-center justify-center">
+          {renderPage()}
+        </div>
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 border-t border-gray-200 dark:border-slate-700 shadow-2xl z-40">
-        <div className="max-w-screen-xl mx-auto px-4">
-          <div className="flex justify-around items-center h-16">
-            <button
-              onClick={() => setCurrentPage('home')}
-              className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-                currentPage === 'home' ? 'text-blue-700 dark:text-blue-200 font-semibold' : 'text-gray-500 dark:text-gray-300'
-              }`}
-              aria-label="Home"
-            >
-              <Home className="w-6 h-6 mb-1" />
-              <span className="text-xs">{t.nav.home}</span>
-            </button>
-            <button
-              onClick={() => setCurrentPage('games')}
-              className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-                currentPage === 'games' ? 'text-blue-700 dark:text-blue-200 font-semibold' : 'text-gray-500 dark:text-gray-300'
-              }`}
-              aria-label="Games"
-            >
-              <BookOpen className="w-6 h-6 mb-1" />
-              <span className="text-xs">{t.nav.games}</span>
-            </button>
-            <button
-              onClick={() => setCurrentPage('progress')}
-              className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-                currentPage === 'progress' ? 'text-blue-700 dark:text-blue-200 font-semibold' : 'text-gray-500 dark:text-gray-300'
-              }`}
-              aria-label="Progress"
-            >
-              <Trophy className="w-6 h-6 mb-1" />
-              <span className="text-xs">{t.nav.progress}</span>
-            </button>
-            {role === 'teacher' && (
-              <button
-                onClick={() => setCurrentPage('teacher')}
-                className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-                  currentPage === 'teacher' ? 'text-blue-700 dark:text-blue-200 font-semibold' : 'text-gray-500 dark:text-gray-300'
-                }`}
-                aria-label="Teacher Panel"
-              >
-                <BarChart3 className="w-6 h-6 mb-1" />
-                <span className="text-xs">{t.nav.teacher}</span>
-              </button>
-            )}
-            <button
-              onClick={() => setCurrentPage('settings')}
-              className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
-                currentPage === 'settings' ? 'text-blue-700 dark:text-blue-200 font-semibold' : 'text-gray-500 dark:text-gray-300'
-              }`}
-              aria-label="Settings"
-            >
-              <Settings className="w-6 h-6 mb-1" />
-              <span className="text-xs">{t.nav.settings}</span>
-            </button>
-          </div>
-        </div>
+      <nav className="h-20 bg-white/90 dark:bg-gray-900/90 border-t border-gray-200 dark:border-gray-700 shadow-lg flex justify-around items-center rounded-t-2xl">
+        <NavButton
+          active={currentPage === "home"}
+          icon={<Home className="w-6 h-6 mb-1 text-purple-600" />}
+          label={t.nav.home}
+          onClick={() => setCurrentPage("home")}
+        />
+        <NavButton
+          active={currentPage === "games"}
+          icon={<BookOpen className="w-6 h-6 mb-1 text-pink-500" />}
+          label={t.nav.games}
+          onClick={() => setCurrentPage("games")}
+        />
+        <NavButton
+          active={currentPage === "progress"}
+          icon={<Trophy className="w-6 h-6 mb-1 text-yellow-500" />}
+          label={t.nav.progress}
+          onClick={() => setCurrentPage("progress")}
+        />
+        {role === "teacher" && (
+          <NavButton
+            active={currentPage === "teacher"}
+            icon={<BarChart3 className="w-6 h-6 mb-1 text-green-500" />}
+            label={t.nav.teacher}
+            onClick={() => setCurrentPage("teacher")}
+          />
+        )}
+        <NavButton
+          active={currentPage === "settings"}
+          icon={<Settings className="w-6 h-6 mb-1 text-blue-500" />}
+          label={t.nav.settings}
+          onClick={() => setCurrentPage("settings")}
+        />
       </nav>
 
       {/* Footer */}
-      <footer className="w-full bg-white/80 dark:bg-slate-900/80 border-t border-gray-200 dark:border-slate-700 text-center text-xs text-gray-500 dark:text-gray-300 py-2 mt-2 z-10">
-        <span>&copy; {new Date().getFullYear()} Student Learning App. All rights reserved.</span>
+      <footer className="h-6 w-full text-center text-xs md:text-sm text-gray-500 dark:text-gray-300">
+        © {new Date().getFullYear()} Verbora. All rights reserved.
       </footer>
     </div>
+  );
+}
+
+/* Reusable Nav Button */
+function NavButton({
+  active,
+  icon,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 rounded-2xl
+      ${
+        active
+          ? "bg-gradient-to-t from-purple-300 to-pink-200 dark:from-gray-700 dark:to-gray-600 text-purple-800 dark:text-purple-300 font-semibold shadow-lg scale-105"
+          : "text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-300 hover:bg-purple-100 dark:hover:bg-gray-800"
+      }`}
+    >
+      {icon}
+      <span className="text-sm md:text-base">{label}</span>
+    </button>
   );
 }
 
