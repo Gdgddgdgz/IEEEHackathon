@@ -135,7 +135,7 @@ export function TimeTravelGame({ onBack }: Props) {
           </div>
         </div>
         <p className="text-xs text-gray-600 mt-2">
-          {difficulty === 1 && '🌱 Building foundation - keep it up!'}
+          {difficulty === 1 && 'Building foundation - keep it up!'}
           {difficulty === 2 && '🌿 Getting stronger - good progress!'}
           {difficulty === 3 && '🌳 Master level - excellent work!'}
         </p>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { validateAnswer } from '../../utils/semanticMatch';
 import { ArrowLeft, Check, X, Shuffle } from 'lucide-react';
 import { parallelSentences } from '../../utils/gameData';
 import { updateGameProgress, updateSkill, getUserProgress } from '../../utils/storage';
@@ -16,6 +17,8 @@ export function ParallelSentenceGame({ onBack }: Props) {
   const [score, setScore] = useState(0);
   const [selectedSentence, setSelectedSentence] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  const [feedbackMsg, setFeedbackMsg] = useState<string>('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [shuffledWords, setShuffledWords] = useState<string[]>([]);
   const [userSentence, setUserSentence] = useState<string[]>([]);
   const { t } = useLanguage();
@@ -33,25 +36,33 @@ export function ParallelSentenceGame({ onBack }: Props) {
 
   const handleMatchSelect = (sentence: string) => {
     setSelectedSentence(sentence);
-    
-    // Simple keyword matching for parallel meaning
-    const keywords1 = currentQuestion.english.toLowerCase().split(' ');
-    const keywords2 = sentence.toLowerCase().split(' ');
-    
-    const isCorrect = sentence === currentQuestion.parallel;
-    
-    setFeedback(isCorrect ? 'correct' : 'incorrect');
-    
-    if (isCorrect) {
+    // Accept multiple correct answers if needed
+    const acceptable = Array.isArray(currentQuestion.parallel)
+      ? currentQuestion.parallel
+      : [currentQuestion.parallel];
+    const { isMatch, isExact, bestMatch, suggestions: simSuggestions } = validateAnswer(sentence, acceptable);
+    setFeedback(isMatch ? 'correct' : 'incorrect');
+    if (isMatch) {
       setScore(score + 10);
       updateSkill('vocabulary', 2);
+      setFeedbackMsg(isExact ? t.common.correct : "You're very close! That's an acceptable answer.");
+      setSuggestions([]);
       setTimeout(() => {
         if (currentDay < parallelSentences.length) {
           setCurrentDay(currentDay + 1);
           setSelectedSentence(null);
           setFeedback(null);
+          setFeedbackMsg('');
         }
       }, 1500);
+    } else {
+      if (simSuggestions.length > 0) {
+        setFeedbackMsg("Almost! Try a synonym or check your spelling.");
+        setSuggestions(simSuggestions);
+      } else {
+        setFeedbackMsg("Not quite. Give it another shot!");
+        setSuggestions([]);
+      }
     }
   };
 
@@ -69,20 +80,29 @@ export function ParallelSentenceGame({ onBack }: Props) {
   const checkRearrangedSentence = () => {
     const userText = userSentence.join(' ');
     const correctText = currentQuestion.words?.join(' ') || '';
-    
-    const isCorrect = userText.toLowerCase() === correctText.toLowerCase();
-    
-    setFeedback(isCorrect ? 'correct' : 'incorrect');
-    
-    if (isCorrect) {
+    const acceptable = [correctText];
+    const { isMatch, isExact, bestMatch, suggestions: simSuggestions } = validateAnswer(userText, acceptable);
+    setFeedback(isMatch ? 'correct' : 'incorrect');
+    if (isMatch) {
       setScore(score + 15);
       updateSkill('vocabulary', 3);
+      setFeedbackMsg(isExact ? t.common.correct : "You're very close! That's an acceptable answer.");
+      setSuggestions([]);
       setTimeout(() => {
         if (currentDay < parallelSentences.length) {
           setCurrentDay(currentDay + 1);
           setFeedback(null);
+          setFeedbackMsg('');
         }
       }, 1500);
+    } else {
+      if (simSuggestions.length > 0) {
+        setFeedbackMsg("Almost! Try a synonym or check your spelling.");
+        setSuggestions(simSuggestions);
+      } else {
+        setFeedbackMsg("Not quite. Give it another shot!");
+        setSuggestions([]);
+      }
     }
   };
 
@@ -203,10 +223,15 @@ export function ParallelSentenceGame({ onBack }: Props) {
       {feedback && (
         <div
           className={`mt-4 p-4 rounded-xl ${
-            feedback === 'correct' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            feedback === 'correct' || feedbackMsg.includes('close')
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800'
           }`}
         >
-          {feedback === 'correct' ? '✅ ' + t.common.correct : '❌ ' + t.common.tryAgain}
+          <p className="mb-2">{feedbackMsg}</p>
+          {suggestions.length > 0 && (
+            <p className="text-sm">Other possible answers: {suggestions.join(', ')}</p>
+          )}
         </div>
       )}
     </div>

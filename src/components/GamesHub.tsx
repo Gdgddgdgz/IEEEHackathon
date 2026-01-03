@@ -57,7 +57,7 @@ export function GamesHub() {
   return (
     <div className="min-h-screen p-4 max-w-screen-lg mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl mb-2">Learning Games 🎮</h1>
+        <h1 className="text-3xl mb-2">Learning Games</h1>
         <p className="text-gray-600">Choose a game to start your learning journey</p>
       </div>
 
@@ -114,7 +114,7 @@ export function GamesHub() {
               {/* Unlock Level */}
               {isLocked && (
                 <div className="text-sm text-gray-500">
-                  🔒 Unlock at Level {game.unlockLevel}
+                  Unlock at Level {game.unlockLevel}
                 </div>
               )}
 
@@ -131,7 +131,7 @@ export function GamesHub() {
 
       {/* Tips Section */}
       <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
-        <h2 className="text-xl mb-3">💡 Learning Tips</h2>
+        <h2 className="text-xl mb-3">Learning Tips</h2>
         <ul className="space-y-2 text-gray-700">
           <li>• Play different games to develop all skills</li>
           <li>• Practice daily to maintain your streak</li>

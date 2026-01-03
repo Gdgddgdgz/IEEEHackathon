@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { validateAnswer } from '../../utils/semanticMatch';
 import { ArrowLeft, Search } from 'lucide-react';
 import { errorQuestions } from '../../utils/gameData';
 import { updateSkill } from '../../utils/storage';
@@ -13,27 +14,39 @@ export function ErrorDetectiveGame({ onBack }: Props) {
   const [score, setScore] = useState(0);
   const [userCorrection, setUserCorrection] = useState('');
   const [showAnswer, setShowAnswer] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState<string>('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const { t } = useLanguage();
 
   const currentQuestion = errorQuestions[currentDay - 1];
 
   const checkAnswer = () => {
     setShowAnswer(true);
-    
-    // Simple check - if user's correction is close to correct answer
-    const similarity = userCorrection.toLowerCase().trim() === currentQuestion.correctSentence.toLowerCase().trim();
-    
-    if (similarity) {
+    const acceptable = Array.isArray(currentQuestion.correctSentence)
+      ? currentQuestion.correctSentence
+      : [currentQuestion.correctSentence];
+    const { isMatch, isExact, bestMatch, suggestions: simSuggestions } = validateAnswer(userCorrection, acceptable);
+    if (isMatch) {
       setScore(score + 15);
       updateSkill('logic', 3);
-      
+      setFeedbackMsg(isExact ? t.common.correct : "You're very close! That's an acceptable answer.");
+      setSuggestions([]);
       setTimeout(() => {
         if (currentDay < errorQuestions.length) {
           setCurrentDay(currentDay + 1);
           setUserCorrection('');
           setShowAnswer(false);
+          setFeedbackMsg('');
         }
       }, 2500);
+    } else {
+      if (simSuggestions.length > 0) {
+        setFeedbackMsg("Almost! Try a synonym or check your spelling.");
+        setSuggestions(simSuggestions);
+      } else {
+        setFeedbackMsg("Not quite. Give it another shot!");
+        setSuggestions([]);
+      }
     }
   };
 
@@ -122,11 +135,13 @@ export function ErrorDetectiveGame({ onBack }: Props) {
       {/* Answer and Explanation */}
       {showAnswer && (
         <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6">
-          <h3 className="text-green-800 mb-3">✅ Correct Answer:</h3>
-          <p className="text-xl text-green-700 mb-4">{currentQuestion.correctSentence}</p>
-          
+          <h3 className="text-green-800 mb-3">{feedbackMsg}</h3>
+          {suggestions.length > 0 && (
+            <p className="text-sm">Other possible answers: {suggestions.join(', ')}</p>
+          )}
+          <p className="text-xl text-green-700 mb-4">Correct: {Array.isArray(currentQuestion.correctSentence) ? currentQuestion.correctSentence[0] : currentQuestion.correctSentence}</p>
           <div className="bg-white rounded-xl p-4">
-            <h4 className="mb-2">📚 Explanation:</h4>
+            <h4 className="mb-2">Explanation:</h4>
             <p className="text-gray-700">{currentQuestion.explanation}</p>
           </div>
         </div>

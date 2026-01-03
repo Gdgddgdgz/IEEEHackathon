@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { validateAnswer } from '../../utils/semanticMatch';
 import { ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import { visualWordData } from '../../utils/gameData';
 import { updateSkill } from '../../utils/storage';
@@ -13,6 +14,8 @@ export function VisualWordGame({ onBack }: Props) {
   const [score, setScore] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState<string>('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [imageUrl, setImageUrl] = useState<string>('');
   const { t } = useLanguage();
 
@@ -27,12 +30,17 @@ export function VisualWordGame({ onBack }: Props) {
     setSelectedOption(option);
     setShowFeedback(true);
 
-    const isCorrect = option === currentQuestion.correctWord;
+    // Accept multiple correct answers (array)
+    const acceptable = Array.isArray(currentQuestion.correctWord)
+      ? currentQuestion.correctWord
+      : [currentQuestion.correctWord];
+    const { isMatch, isExact, bestMatch, suggestions: simSuggestions } = validateAnswer(option, acceptable);
 
-    if (isCorrect) {
+    if (isMatch) {
       setScore(score + 10);
       updateSkill('vocabulary', 2);
-      
+      setFeedbackMsg(isExact ? t.common.correct : "You're very close! That's an acceptable answer.");
+      setSuggestions([]);
       setTimeout(() => {
         if (currentDay < visualWordData.length) {
           setCurrentDay(currentDay + 1);
@@ -40,12 +48,23 @@ export function VisualWordGame({ onBack }: Props) {
           setShowFeedback(false);
         }
       }, 1500);
+    } else {
+      // Show nuanced feedback
+      if (simSuggestions.length > 0) {
+        setFeedbackMsg("Almost! Try a synonym or check your spelling.");
+        setSuggestions(simSuggestions);
+      } else {
+        setFeedbackMsg("Not quite. Give it another shot!");
+        setSuggestions([]);
+      }
     }
   };
 
   const tryAgain = () => {
     setSelectedOption(null);
     setShowFeedback(false);
+    setFeedbackMsg('');
+    setSuggestions([]);
   };
 
   return (
@@ -56,7 +75,7 @@ export function VisualWordGame({ onBack }: Props) {
           <ArrowLeft className="w-6 h-6" />
         </button>
         <div className="text-center">
-          <h1 className="text-xl">Visual to Word 🖼️</h1>
+          <h1 className="text-xl">Visual to Word</h1>
           <p className="text-sm text-gray-600">Day {currentDay} / {visualWordData.length}</p>
         </div>
         <div className="bg-yellow-100 px-4 py-2 rounded-lg">
@@ -116,35 +135,32 @@ export function VisualWordGame({ onBack }: Props) {
         {showFeedback && (
           <div
             className={`mt-4 p-4 rounded-xl ${
-              selectedOption === currentQuestion.correctWord
+              feedbackMsg.includes('correct') || feedbackMsg.includes('close')
                 ? 'bg-green-100 text-green-800'
                 : 'bg-red-100 text-red-800'
             }`}
           >
-            {selectedOption === currentQuestion.correctWord ? (
-              <div>
-                <p className="mb-2">✅ {t.common.correct}</p>
-                <p className="text-sm">Perfect! Moving to next image...</p>
-              </div>
-            ) : (
-              <div>
-                <p className="mb-2">❌ {t.common.incorrect}</p>
-                <p className="text-sm">The correct answer is: {currentQuestion.correctWord}</p>
+            <div>
+              <p className="mb-2">{feedbackMsg}</p>
+              {suggestions.length > 0 && (
+                <p className="text-sm">Other possible answers: {suggestions.join(', ')}</p>
+              )}
+              {!feedbackMsg.includes('correct') && (
                 <button
                   onClick={tryAgain}
                   className="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all"
                 >
                   {t.common.tryAgain}
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>
 
       {/* Hint Section */}
       <div className="mt-6 bg-blue-50 rounded-2xl p-6">
-        <h3 className="mb-2">💡 Tip:</h3>
+        <h3 className="mb-2">Tip:</h3>
         <p className="text-sm text-gray-700">
           Look carefully at all details in the image. Think about what the main subject is.
         </p>

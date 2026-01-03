@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { validateAnswer } from '../../utils/semanticMatch';
 import { ArrowLeft, Zap, Brain } from 'lucide-react';
 import { quizQuestions } from '../../utils/gameData';
 import { updateSkill } from '../../utils/storage';
@@ -18,6 +19,8 @@ export function QuizBattleGame({ onBack }: Props) {
   const [timeLeft, setTimeLeft] = useState(15);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState<string>('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [questionsAnswered, setQuestionsAnswered] = useState(0);
   const { t } = useLanguage();
 
@@ -38,12 +41,27 @@ export function QuizBattleGame({ onBack }: Props) {
     setSelectedAnswer(answerIndex);
     setShowFeedback(true);
 
-    const isCorrect = answerIndex === currentQuestion.correctAnswer;
-    
+    // Accept multiple correct answers (array)
+    const correctOption = currentQuestion.options[currentQuestion.correctAnswer];
+    const acceptable = Array.isArray(correctOption) ? correctOption : [correctOption];
+    const userOption = answerIndex !== null ? currentQuestion.options[answerIndex] : '';
+    const { isMatch, isExact, bestMatch, suggestions: simSuggestions } = validateAnswer(userOption, acceptable);
+    const isCorrect = isMatch;
+
     if (isCorrect) {
       const points = Math.max(5, Math.floor(timeLeft / 3) * 5);
       setPlayerScore(playerScore + points);
       updateSkill('speed', 2);
+      setFeedbackMsg(isExact ? `Correct! +${points} points` : "You're very close! That's an acceptable answer.");
+      setSuggestions([]);
+    } else {
+      if (simSuggestions.length > 0) {
+        setFeedbackMsg("Almost! Try a synonym or check your spelling.");
+        setSuggestions(simSuggestions);
+      } else {
+        setFeedbackMsg(`Incorrect. Correct answer: ${Array.isArray(correctOption) ? correctOption[0] : correctOption}`);
+        setSuggestions([]);
+      }
     }
 
     // AI logic (60% correct rate on average)
@@ -58,7 +76,6 @@ export function QuizBattleGame({ onBack }: Props) {
     setTimeout(() => {
       const newAnswered = questionsAnswered + 1;
       setQuestionsAnswered(newAnswered);
-      
       if (newAnswered >= totalQuestions) {
         // Game over
         alert(
@@ -73,6 +90,8 @@ export function QuizBattleGame({ onBack }: Props) {
         setTimeLeft(15);
         setSelectedAnswer(null);
         setShowFeedback(false);
+        setFeedbackMsg('');
+        setSuggestions([]);
       }
     }, 2000);
   };
@@ -219,15 +238,14 @@ export function QuizBattleGame({ onBack }: Props) {
         {showFeedback && (
           <div
             className={`mt-4 p-4 rounded-xl ${
-              selectedAnswer === currentQuestion.correctAnswer
+              feedbackMsg.includes('Correct') || feedbackMsg.includes('close')
                 ? 'bg-green-100 text-green-800'
                 : 'bg-red-100 text-red-800'
             }`}
           >
-            {selectedAnswer === currentQuestion.correctAnswer ? (
-              <p>✅ Correct! +{Math.max(5, Math.floor(timeLeft / 3) * 5)} points</p>
-            ) : (
-              <p>❌ Incorrect. Correct answer: {currentQuestion.options[currentQuestion.correctAnswer]}</p>
+            <p className="mb-2">{feedbackMsg}</p>
+            {suggestions.length > 0 && (
+              <p className="text-sm">Other possible answers: {suggestions.join(', ')}</p>
             )}
           </div>
         )}

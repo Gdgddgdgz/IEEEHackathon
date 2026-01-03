@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { validateAnswer } from '../../utils/semanticMatch';
 import { ArrowLeft, Link as LinkIcon } from 'lucide-react';
 import { matchMeaningData } from '../../utils/gameData';
 import { updateSkill } from '../../utils/storage';
@@ -14,6 +15,8 @@ export function MatchMeaningGame({ onBack }: Props) {
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
   const [selectedMeaning, setSelectedMeaning] = useState<string | null>(null);
   const [matches, setMatches] = useState<Array<{ word: string; meaning: string }>>([]);
+  const [feedbackMsg, setFeedbackMsg] = useState<string>('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [shuffledMeanings, setShuffledMeanings] = useState<string[]>([]);
   const { t } = useLanguage();
 
@@ -35,23 +38,40 @@ export function MatchMeaningGame({ onBack }: Props) {
   const handleMeaningClick = (meaning: string) => {
     if (selectedWord) {
       setSelectedMeaning(meaning);
-      
-      // Check if match is correct
-      if (meaning === currentQuestion.meaning) {
+      // Accept multiple correct meanings (array)
+      const correctOption = currentQuestion.meaning;
+      const acceptable = Array.isArray(correctOption) ? correctOption : [correctOption];
+      const { isMatch, isExact, bestMatch, suggestions: simSuggestions } = validateAnswer(meaning, acceptable);
+      const isCorrect = isMatch;
+
+      if (isCorrect) {
         setMatches([...matches, { word: selectedWord, meaning }]);
         setScore(score + 10);
         updateSkill('vocabulary', 2);
-        
+        setFeedbackMsg(isExact ? 'Perfect match! Moving to next word...' : "You're very close! That's an acceptable meaning.");
+        setSuggestions([]);
         setTimeout(() => {
           if (currentDay < matchMeaningData.length) {
             setCurrentDay(currentDay + 1);
           }
+          setSelectedWord(null);
+          setSelectedMeaning(null);
+          setFeedbackMsg('');
+          setSuggestions([]);
         }, 1500);
       } else {
-        // Wrong match - reset after showing feedback
+        if (simSuggestions.length > 0) {
+          setFeedbackMsg("Almost! Try a synonym or check your spelling.");
+          setSuggestions(simSuggestions);
+        } else {
+          setFeedbackMsg('Not quite. Try again!');
+          setSuggestions([]);
+        }
         setTimeout(() => {
           setSelectedWord(null);
           setSelectedMeaning(null);
+          setFeedbackMsg('');
+          setSuggestions([]);
         }, 1000);
       }
     }
@@ -150,15 +170,14 @@ export function MatchMeaningGame({ onBack }: Props) {
       {selectedWord && selectedMeaning && (
         <div
           className={`mt-6 p-4 rounded-xl ${
-            selectedMeaning === currentQuestion.meaning
+            feedbackMsg.includes('match') || feedbackMsg.includes('close')
               ? 'bg-green-100 text-green-800'
               : 'bg-red-100 text-red-800'
           }`}
         >
-          {selectedMeaning === currentQuestion.meaning ? (
-            <p>✅ Perfect match! Moving to next word...</p>
-          ) : (
-            <p>❌ Not quite. Try again!</p>
+          <p className="mb-2">{feedbackMsg}</p>
+          {suggestions.length > 0 && (
+            <p className="text-sm">Other possible answers: {suggestions.join(', ')}</p>
           )}
         </div>
       )}

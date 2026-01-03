@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { validateAnswer } from '../../utils/semanticMatch';
 import { ArrowLeft, TrendingUp, TrendingDown } from 'lucide-react';
 import { conceptQuestions } from '../../utils/gameData';
 import { updateSkill } from '../../utils/storage';
@@ -15,6 +16,8 @@ export function ConceptLadderGame({ onBack }: Props) {
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState<string>('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const { t } = useLanguage();
 
   const maxSteps = 10;
@@ -34,32 +37,47 @@ export function ConceptLadderGame({ onBack }: Props) {
     setSelectedAnswer(answerIndex);
     setShowFeedback(true);
 
-    const isCorrect = answerIndex === currentQuestion.correctAnswer;
+    // Accept multiple correct answers (array)
+    const correctOption = currentQuestion.options[currentQuestion.correctAnswer];
+    const acceptable = Array.isArray(correctOption) ? correctOption : [correctOption];
+    const userOption = currentQuestion.options[answerIndex];
+    const { isMatch, isExact, bestMatch, suggestions: simSuggestions } = validateAnswer(userOption, acceptable);
+    const isCorrect = isMatch;
 
     if (isCorrect) {
       setScore(score + 10);
       updateSkill('logic', 2);
-      
+      setFeedbackMsg(isExact ? 'Correct! Climbing up!' : "You're very close! That's an acceptable answer.");
+      setSuggestions([]);
       setTimeout(() => {
         if (currentStep < maxSteps) {
           setCurrentStep(currentStep + 1);
         } else {
-          // Reached top of ladder!
-          alert('🎉 Congratulations! You reached the top of the ladder!');
+          alert('Congratulations! You reached the top of the ladder!');
           setCurrentDay(currentDay + 1);
           setCurrentStep(1);
         }
         setSelectedAnswer(null);
         setShowFeedback(false);
+        setFeedbackMsg('');
+        setSuggestions([]);
       }, 1500);
     } else {
-      // Drop one step
+      if (simSuggestions.length > 0) {
+        setFeedbackMsg("Almost! Try a synonym or check your spelling.");
+        setSuggestions(simSuggestions);
+      } else {
+        setFeedbackMsg('Incorrect. Going down one step.');
+        setSuggestions([]);
+      }
       setTimeout(() => {
         if (currentStep > 1) {
           setCurrentStep(currentStep - 1);
         }
         setSelectedAnswer(null);
         setShowFeedback(false);
+        setFeedbackMsg('');
+        setSuggestions([]);
       }, 1500);
     }
   };
@@ -189,28 +207,16 @@ export function ConceptLadderGame({ onBack }: Props) {
           {showFeedback && (
             <div
               className={`mt-4 p-4 rounded-xl ${
-                selectedAnswer === currentQuestion.correctAnswer
+                feedbackMsg.includes('Correct') || feedbackMsg.includes('close')
                   ? 'bg-green-100 border-2 border-green-300'
                   : 'bg-red-100 border-2 border-red-300'
               }`}
             >
-              {selectedAnswer === currentQuestion.correctAnswer ? (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-5 h-5 text-green-600" />
-                    <span className="text-green-800">Correct! Climbing up! 🎉</span>
-                  </div>
-                  <p className="text-sm text-green-700">{currentQuestion.explanation}</p>
-                </div>
-              ) : (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingDown className="w-5 h-5 text-red-600" />
-                    <span className="text-red-800">Incorrect. Going down one step.</span>
-                  </div>
-                  <p className="text-sm text-red-700">{currentQuestion.explanation}</p>
-                </div>
+              <div className="mb-2">{feedbackMsg}</div>
+              {suggestions.length > 0 && (
+                <div className="text-sm">Other possible answers: {suggestions.join(', ')}</div>
               )}
+              <p className="text-sm text-gray-700">{currentQuestion.explanation}</p>
             </div>
           )}
         </div>

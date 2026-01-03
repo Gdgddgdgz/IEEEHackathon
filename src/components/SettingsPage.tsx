@@ -6,12 +6,14 @@ import { getUserProgress, saveUserProgress } from '../utils/storage';
 interface SettingsPageProps {
   isTeacherMode: boolean;
   setIsTeacherMode: (value: boolean) => void;
+  dark?: boolean;
+  setDark?: (d: boolean) => void;
+  onLogout?: () => void;
 }
 
-export function SettingsPage({ isTeacherMode, setIsTeacherMode }: SettingsPageProps) {
+export function SettingsPage({ isTeacherMode, setIsTeacherMode, dark, setDark, onLogout }: SettingsPageProps) {
   const { language, setLanguage } = useLanguage();
   const [readAloud, setReadAloud] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [offlineMode, setOfflineMode] = useState(true);
   const progress = getUserProgress();
 
@@ -34,21 +36,19 @@ export function SettingsPage({ isTeacherMode, setIsTeacherMode }: SettingsPagePr
   };
 
   return (
-    <div className="min-h-screen p-4 max-w-screen-lg mx-auto pb-20">
-      <h1 className="text-3xl mb-6">Settings ⚙️</h1>
+    <div className="min-h-[60vh] p-4 max-w-screen-lg mx-auto pb-20">
+      <h1 className="text-4xl font-bold mb-8 text-blue-700 drop-shadow">Settings</h1>
 
       {/* Language Settings */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg mb-4">
-        <div className="flex items-center gap-3 mb-4">
-          <Globe className="w-6 h-6 text-blue-600" />
-          <h2 className="text-xl">Language 🌐</h2>
+      <div className="bg-white rounded-2xl p-8 shadow-xl mb-6 border border-blue-100">
+        <div className="flex items-center gap-4 mb-6">
+          <Globe className="w-7 h-7 text-blue-600" />
+          <h2 className="text-2xl font-semibold">Language</h2>
         </div>
-        
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="text-base text-gray-600 mb-4">
           Choose your preferred language for the app
         </p>
-
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => handleLanguageChange('en')}
             className={`p-4 rounded-xl border-2 transition-all ${
@@ -57,10 +57,8 @@ export function SettingsPage({ isTeacherMode, setIsTeacherMode }: SettingsPagePr
                 : 'border-gray-200 bg-white hover:bg-gray-50'
             }`}
           >
-            <div className="text-2xl mb-2">🇬🇧</div>
             <div>English</div>
           </button>
-
           <button
             onClick={() => handleLanguageChange('hi')}
             className={`p-4 rounded-xl border-2 transition-all ${
@@ -69,17 +67,16 @@ export function SettingsPage({ isTeacherMode, setIsTeacherMode }: SettingsPagePr
                 : 'border-gray-200 bg-white hover:bg-gray-50'
             }`}
           >
-            <div className="text-2xl mb-2">🇮🇳</div>
             <div>हिंदी (Hindi)</div>
           </button>
         </div>
       </div>
 
       {/* Accessibility Settings */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg mb-4">
+      <div className="bg-white rounded-2xl p-8 shadow-xl mb-6 border border-purple-100">
         <div className="flex items-center gap-3 mb-4">
           <Volume2 className="w-6 h-6 text-purple-600" />
-          <h2 className="text-xl">Accessibility 🔊</h2>
+          <h2 className="text-xl">Accessibility</h2>
         </div>
 
         <div className="space-y-4">
@@ -112,18 +109,29 @@ export function SettingsPage({ isTeacherMode, setIsTeacherMode }: SettingsPagePr
               </p>
             </div>
             <button
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={() => setDark && setDark(!dark)}
               className={`w-14 h-7 rounded-full transition-all ${
-                darkMode ? 'bg-indigo-500' : 'bg-gray-300'
+                dark ? 'bg-indigo-500' : 'bg-gray-300'
               }`}
             >
               <div
                 className={`w-6 h-6 bg-white rounded-full transition-all ${
-                  darkMode ? 'translate-x-7' : 'translate-x-1'
+                  dark ? 'translate-x-7' : 'translate-x-1'
                 }`}
               />
             </button>
           </div>
+              {/* Logout Button */}
+              {onLogout && (
+                <div className="flex justify-end mt-8">
+                  <button
+                    className="px-6 py-2 rounded-lg border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 font-semibold"
+                    onClick={onLogout}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
         </div>
       </div>
 
@@ -131,7 +139,7 @@ export function SettingsPage({ isTeacherMode, setIsTeacherMode }: SettingsPagePr
       <div className="bg-white rounded-2xl p-6 shadow-lg mb-4">
         <div className="flex items-center gap-3 mb-4">
           <Wifi className="w-6 h-6 text-green-600" />
-          <h2 className="text-xl">Offline Mode 📶</h2>
+          <h2 className="text-xl">Offline Mode</h2>
         </div>
 
         <div className="flex items-center justify-between mb-4">
@@ -167,7 +175,7 @@ export function SettingsPage({ isTeacherMode, setIsTeacherMode }: SettingsPagePr
       <div className="bg-white rounded-2xl p-6 shadow-lg mb-4">
         <div className="flex items-center gap-3 mb-4">
           <Users className="w-6 h-6 text-orange-600" />
-          <h2 className="text-xl">Account Type 👤</h2>
+          <h2 className="text-xl">Account Type</h2>
         </div>
 
         <div className="flex items-center justify-between">
@@ -196,7 +204,7 @@ export function SettingsPage({ isTeacherMode, setIsTeacherMode }: SettingsPagePr
       <div className="bg-white rounded-2xl p-6 shadow-lg mb-4">
         <div className="flex items-center gap-3 mb-4">
           <BookOpen className="w-6 h-6 text-purple-600" />
-          <h2 className="text-xl">Profile 👤</h2>
+          <h2 className="text-xl">Profile</h2>
         </div>
 
         <div className="space-y-3">
@@ -226,7 +234,7 @@ export function SettingsPage({ isTeacherMode, setIsTeacherMode }: SettingsPagePr
       <div className="bg-white rounded-2xl p-6 shadow-lg mb-4">
         <div className="flex items-center gap-3 mb-4">
           <Trash2 className="w-6 h-6 text-red-600" />
-          <h2 className="text-xl">Data Management 💾</h2>
+          <h2 className="text-xl">Data Management</h2>
         </div>
 
         <div className="space-y-3">
@@ -245,14 +253,14 @@ export function SettingsPage({ isTeacherMode, setIsTeacherMode }: SettingsPagePr
           </button>
           
           <p className="text-xs text-gray-500 text-center">
-            ⚠️ This will delete all your progress and cannot be undone
+            This will delete all your progress and cannot be undone
           </p>
         </div>
       </div>
 
       {/* App Info */}
       <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-2xl p-6 shadow-lg">
-        <h2 className="text-xl mb-3">About This App 📱</h2>
+        <h2 className="text-xl mb-3">About This App</h2>
         <div className="space-y-2 text-sm opacity-90">
           <p>• Offline-first learning platform</p>
           <p>• 30+ days of educational content</p>
@@ -261,7 +269,7 @@ export function SettingsPage({ isTeacherMode, setIsTeacherMode }: SettingsPagePr
           <p>• Built for rural education</p>
         </div>
         <div className="mt-4 pt-4 border-t border-white/20">
-          <p className="text-xs">Version 1.0.0 • Made with ❤️ for students</p>
+          <p className="text-xs">Version 1.0.0 • Made for students</p>
         </div>
       </div>
     </div>

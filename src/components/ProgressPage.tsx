@@ -9,19 +9,19 @@ export function ProgressPage() {
   const { t } = useLanguage();
 
   const skillData = [
-    { name: 'Vocabulary', value: progress.skills.vocabulary, color: 'bg-blue-500', icon: '📚' },
-    { name: 'Logic', value: progress.skills.logic, color: 'bg-green-500', icon: '🧠' },
-    { name: 'Creativity', value: progress.skills.creativity, color: 'bg-purple-500', icon: '🎨' },
-    { name: 'Speed', value: progress.skills.speed, color: 'bg-yellow-500', icon: '⚡' },
+    { name: 'Vocabulary', value: progress.skills.vocabulary, color: 'bg-blue-500', icon: '' },
+    { name: 'Logic', value: progress.skills.logic, color: 'bg-green-500', icon: '' },
+    { name: 'Creativity', value: progress.skills.creativity, color: 'bg-purple-500', icon: '' },
+    { name: 'Speed', value: progress.skills.speed, color: 'bg-yellow-500', icon: '' },
   ];
 
   return (
-    <div className="min-h-screen p-4 max-w-screen-lg mx-auto pb-20">
-      <h1 className="text-3xl mb-6">Your Progress 🌟</h1>
+    <div className="min-h-[60vh] p-4 max-w-screen-lg mx-auto pb-20">
+      <h1 className="text-4xl font-bold mb-8 text-blue-700 drop-shadow">Your Progress</h1>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-2xl p-4 shadow-lg">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-2xl p-6 shadow-xl border border-blue-100">
           <div className="flex items-center justify-between mb-2">
             <Trophy className="w-5 h-5 text-yellow-500" />
             <span className="text-2xl">{progress.level}</span>
@@ -29,7 +29,7 @@ export function ProgressPage() {
           <p className="text-sm text-gray-600">Level</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 shadow-lg">
+        <div className="bg-white rounded-2xl p-6 shadow-xl border border-blue-100">
           <div className="flex items-center justify-between mb-2">
             <Star className="w-5 h-5 text-blue-500" />
             <span className="text-2xl">{progress.totalScore}</span>
@@ -37,7 +37,7 @@ export function ProgressPage() {
           <p className="text-sm text-gray-600">Total Score</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 shadow-lg">
+        <div className="bg-white rounded-2xl p-6 shadow-xl border border-blue-100">
           <div className="flex items-center justify-between mb-2">
             <Flame className="w-5 h-5 text-orange-500" />
             <span className="text-2xl">{progress.dailyStreak}</span>
@@ -45,7 +45,7 @@ export function ProgressPage() {
           <p className="text-sm text-gray-600">Day Streak</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 shadow-lg">
+        <div className="bg-white rounded-2xl p-6 shadow-xl border border-blue-100">
           <div className="flex items-center justify-between mb-2">
             <Award className="w-5 h-5 text-purple-500" />
             <span className="text-2xl">{progress.badges.length}</span>
@@ -55,10 +55,10 @@ export function ProgressPage() {
       </div>
 
       {/* Skill Tree */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
-        <h2 className="text-xl mb-4 flex items-center gap-2">
-          <TrendingUp className="w-6 h-6" />
-          Skill Tree 🌳
+      <div className="bg-white rounded-2xl p-8 shadow-2xl mb-8 border border-purple-100">
+        <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3 text-purple-700">
+          <TrendingUp className="w-7 h-7" />
+          Skill Tree
         </h2>
         
         <div className="space-y-4">
@@ -86,7 +86,7 @@ export function ProgressPage() {
       <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
         <h2 className="text-xl mb-4 flex items-center gap-2">
           <Award className="w-6 h-6" />
-          Village Hero Badges 🥇
+          Village Hero Badges
         </h2>
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -107,7 +107,7 @@ export function ProgressPage() {
                 <p className="text-xs text-center text-gray-600">{badge.description}</p>
                 {!earned && (
                   <p className="text-xs text-center text-gray-500 mt-2">
-                    🔒 Not yet earned
+                    Not yet earned
                   </p>
                 )}
               </div>
@@ -118,11 +118,11 @@ export function ProgressPage() {
 
       {/* Learning Avatar Evolution */}
       <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-2xl p-6 shadow-lg mb-6">
-        <h2 className="text-xl mb-4">Learning Avatar 🤖</h2>
+        <h2 className="text-xl mb-4">Learning Avatar</h2>
         
         <div className="flex items-center gap-6">
           <div className="text-8xl">
-            {progress.level < 5 ? '🧒' : progress.level < 10 ? '👨‍🎓' : '👨‍🏫'}
+            {/* Avatar removed for professional look */}
           </div>
           <div className="flex-1">
             <p className="text-2xl mb-2">
