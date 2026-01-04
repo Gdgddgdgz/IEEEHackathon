@@ -9,173 +9,173 @@ export function ProgressPage() {
   const { t } = useLanguage();
 
   const skillData = [
-    { name: 'Vocabulary', value: progress.skills.vocabulary, color: 'bg-blue-500', icon: '' },
-    { name: 'Logic', value: progress.skills.logic, color: 'bg-green-500', icon: '' },
-    { name: 'Creativity', value: progress.skills.creativity, color: 'bg-purple-500', icon: '' },
-    { name: 'Speed', value: progress.skills.speed, color: 'bg-yellow-500', icon: '' },
+    { name: 'Vocabulary', value: progress.skills.vocabulary, color: 'bg-blue-500', icon: '📚' },
+    { name: 'Logic', value: progress.skills.logic, color: 'bg-green-500', icon: '🧠' },
+    { name: 'Creativity', value: progress.skills.creativity, color: 'bg-purple-500', icon: '🎨' },
+    { name: 'Speed', value: progress.skills.speed, color: 'bg-yellow-500', icon: '⚡' },
   ];
 
   return (
-    <div className="min-h-[60vh] p-4 max-w-screen-lg mx-auto pb-20">
-      <h1 className="text-4xl font-bold mb-8 text-blue-700 drop-shadow">Your Progress</h1>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-2xl p-6 shadow-xl border border-blue-100">
-          <div className="flex items-center justify-between mb-2">
-            <Trophy className="w-5 h-5 text-yellow-500" />
-            <span className="text-2xl">{progress.level}</span>
-          </div>
-          <p className="text-sm text-gray-600">Level</p>
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 shadow-xl border border-blue-100">
-          <div className="flex items-center justify-between mb-2">
-            <Star className="w-5 h-5 text-blue-500" />
-            <span className="text-2xl">{progress.totalScore}</span>
-          </div>
-          <p className="text-sm text-gray-600">Total Score</p>
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 shadow-xl border border-blue-100">
-          <div className="flex items-center justify-between mb-2">
-            <Flame className="w-5 h-5 text-orange-500" />
-            <span className="text-2xl">{progress.dailyStreak}</span>
-          </div>
-          <p className="text-sm text-gray-600">Day Streak</p>
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 shadow-xl border border-blue-100">
-          <div className="flex items-center justify-between mb-2">
-            <Award className="w-5 h-5 text-purple-500" />
-            <span className="text-2xl">{progress.badges.length}</span>
-          </div>
-          <p className="text-sm text-gray-600">Badges</p>
-        </div>
-      </div>
-
-      {/* Skill Tree */}
-      <div className="bg-white rounded-2xl p-8 shadow-2xl mb-8 border border-purple-100">
-        <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3 text-purple-700">
-          <TrendingUp className="w-7 h-7" />
-          Skill Tree
-        </h2>
+    /* OUTER CONTAINER: Forces the background to the edges of the screen */
+    <div className="w-full min-h-screen m-0 p-0 transition-colors duration-300" style={{ background: 'var(--background)' }}>
+      
+      {/* INNER CONTENT: Centered for readability */}
+      <div className="max-w-screen-lg mx-auto p-6 pb-32">
         
-        <div className="space-y-4">
-          {skillData.map((skill) => (
-            <div key={skill.name}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{skill.icon}</span>
-                  <span>{skill.name}</span>
-                </div>
-                <span className="text-sm">{skill.value}%</span>
+        <header className="mb-10 pt-4">
+          <h1 className="text-4xl font-black mb-2 tracking-tight" style={{ color: 'var(--foreground)' }}>
+            Your Progress
+          </h1>
+          <p className="text-lg font-medium opacity-70" style={{ color: 'var(--foreground)' }}>
+            Tracking your journey to mastery
+          </p>
+        </header>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+          {[
+            { label: 'Level', value: progress.level, icon: Trophy, color: 'text-yellow-500' },
+            { label: 'Total Score', value: progress.totalScore, icon: Star, color: 'text-blue-500' },
+            { label: 'Day Streak', value: progress.dailyStreak, icon: Flame, color: 'text-orange-500' },
+            { label: 'Badges', value: progress.badges.length, icon: Award, color: 'text-purple-500' },
+          ].map((stat, i) => (
+            <div 
+              key={i} 
+              className="rounded-3xl p-6 shadow-xl border transition-transform hover:scale-105"
+              style={{ background: 'var(--card)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                <span className="text-3xl font-black">{stat.value}</span>
               </div>
-              <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${skill.color} transition-all duration-500`}
-                  style={{ width: `${skill.value}%` }}
-                />
-              </div>
+              <p className="text-xs font-black uppercase tracking-widest opacity-50">{stat.label}</p>
             </div>
           ))}
         </div>
-      </div>
 
-      {/* Badges Collection */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
-        <h2 className="text-xl mb-4 flex items-center gap-2">
-          <Award className="w-6 h-6" />
-          Village Hero Badges
-        </h2>
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {BADGES.map((badge) => {
-            const earned = progress.badges.includes(badge.id);
-            
-            return (
-              <div
-                key={badge.id}
-                className={`rounded-xl p-4 border-2 transition-all ${
-                  earned
-                    ? 'bg-gradient-to-br from-yellow-100 to-orange-100 border-yellow-400'
-                    : 'bg-gray-100 border-gray-300 opacity-50'
-                }`}
-              >
-                <div className="text-4xl mb-2 text-center">{badge.icon}</div>
-                <h3 className="text-center mb-1">{badge.name}</h3>
-                <p className="text-xs text-center text-gray-600">{badge.description}</p>
-                {!earned && (
-                  <p className="text-xs text-center text-gray-500 mt-2">
-                    Not yet earned
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Learning Avatar Evolution */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-2xl p-6 shadow-lg mb-6">
-        <h2 className="text-xl mb-4">Learning Avatar</h2>
-        
-        <div className="flex items-center gap-6">
-          <div className="text-8xl">
-            {/* Avatar removed for professional look */}
-          </div>
-          <div className="flex-1">
-            <p className="text-2xl mb-2">
-              {progress.level < 5 ? 'Beginner' : progress.level < 10 ? 'Scholar' : 'Master'}
-            </p>
-            <p className="opacity-90 text-sm mb-3">
-              {progress.level < 5
-                ? 'Keep learning to evolve!'
-                : progress.level < 10
-                ? 'You\'re making great progress!'
-                : 'You\'ve become a learning master!'}
-            </p>
-            <div className="bg-white/20 rounded-full h-3 overflow-hidden">
-              <div
-                className="h-full bg-white transition-all"
-                style={{ width: `${((progress.level % 5) / 5) * 100}%` }}
-              />
+        {/* Skill Tree & Avatar Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+          
+          {/* Skill Tree */}
+          <div className="rounded-[32px] p-8 shadow-2xl border" style={{ background: 'var(--card)', color: 'var(--foreground)', borderColor: 'var(--border)' }}>
+            <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+              <TrendingUp className="w-7 h-7 text-purple-500" />
+              Skill Tree
+            </h2>
+            <div className="space-y-6">
+              {skillData.map((skill) => (
+                <div key={skill.name}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">{skill.icon}</span>
+                      <span className="font-bold uppercase tracking-tight text-sm opacity-80">{skill.name}</span>
+                    </div>
+                    <span className="font-black text-sm">{skill.value}%</span>
+                  </div>
+                  <div className="h-4 bg-black/10 rounded-full overflow-hidden p-1">
+                    <div
+                      className={`h-full ${skill.color} rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(0,0,0,0.1)]`}
+                      style={{ width: `${skill.value}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-            <p className="text-xs mt-1 opacity-75">
-              {progress.level % 5}/5 to next evolution
-            </p>
+          </div>
+
+          {/* Learning Avatar Evolution */}
+          <div className="rounded-[32px] p-8 shadow-2xl border flex flex-col justify-center overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', color: 'white', borderColor: 'transparent' }}>
+            <div className="relative z-10">
+              <h2 className="text-2xl font-bold mb-2">Evolution Rank</h2>
+              <p className="text-5xl font-black mb-4 tracking-tighter">
+                {progress.level < 5 ? 'Beginner' : progress.level < 10 ? 'Scholar' : 'Master'}
+              </p>
+              <p className="opacity-90 text-sm mb-8 max-w-[200px] leading-relaxed">
+                {progress.level < 5
+                  ? 'The journey of a thousand miles begins with a single step. Keep going!'
+                  : progress.level < 10
+                  ? 'Your dedication is paying off. You are becoming a true scholar!'
+                  : 'You have reached the pinnacle of learning mastery!'}
+              </p>
+              
+              <div className="bg-white/20 rounded-full h-4 overflow-hidden mb-2">
+                <div
+                  className="h-full bg-white transition-all duration-1000"
+                  style={{ width: `${((progress.level % 5) / 5) * 100}%` }}
+                />
+              </div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">
+                {progress.level % 5} / 5 Points to Next Evolution
+              </p>
+            </div>
+            {/* Background Decoration */}
+            <Award className="absolute -bottom-10 -right-10 w-64 h-64 opacity-10 rotate-12" />
           </div>
         </div>
-      </div>
 
-      {/* Games Progress */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg">
-        <h2 className="text-xl mb-4">Games Progress</h2>
-        
-        {Object.keys(progress.gamesProgress).length === 0 ? (
-          <p className="text-gray-500 text-center py-8">
-            Start playing games to see your progress here!
-          </p>
-        ) : (
-          <div className="space-y-4">
-            {Object.entries(progress.gamesProgress).map(([gameId, gameProgress]) => (
-              <div key={gameId} className="border-b pb-4 last:border-b-0">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="capitalize">{gameId.replace('-', ' ')}</span>
-                  <span className="text-sm text-gray-600">
-                    Level {gameProgress.currentLevel} • High Score: {gameProgress.highScore}
-                  </span>
+        {/* Badges Collection */}
+        <div className="rounded-[32px] p-8 shadow-xl mb-10 border" style={{ background: 'var(--card)', color: 'var(--foreground)', borderColor: 'var(--border)' }}>
+          <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+            <Award className="w-7 h-7 text-yellow-500" />
+            Badge Collection
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {BADGES.map((badge) => {
+              const earned = progress.badges.includes(badge.id);
+              return (
+                <div
+                  key={badge.id}
+                  className={`rounded-2xl p-4 border-2 transition-all flex flex-col items-center justify-center text-center ${
+                    earned
+                      ? 'shadow-lg scale-100 border-yellow-400/50 bg-gradient-to-b from-yellow-50 to-white'
+                      : 'opacity-30 grayscale border-transparent bg-black/5'
+                  }`}
+                  style={earned ? { color: '#854d0e' } : { color: 'var(--foreground)' }}
+                >
+                  <div className="text-4xl mb-3 drop-shadow-sm">{badge.icon}</div>
+                  <h3 className="text-[10px] font-black uppercase leading-tight mb-1">{badge.name}</h3>
+                  {earned && <div className="w-1 h-1 rounded-full bg-yellow-500 mt-2" />}
                 </div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
-                    style={{ width: `${Math.min(100, (gameProgress.currentLevel / 10) * 100)}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-        )}
+        </div>
+
+        {/* Games Progress */}
+        <div className="rounded-[32px] p-8 shadow-xl border" style={{ background: 'var(--card)', color: 'var(--foreground)', borderColor: 'var(--border)' }}>
+          <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+            <TrendingUp className="w-7 h-7 text-blue-500" />
+            Game Statistics
+          </h2>
+          
+          {Object.keys(progress.gamesProgress).length === 0 ? (
+            <div className="text-center py-12 opacity-50">
+              <p className="text-lg italic font-medium">Start playing games to see your stats here!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+              {Object.entries(progress.gamesProgress).map(([gameId, gameProgress]) => (
+                <div key={gameId} className="group">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="capitalize font-bold text-lg">{gameId.replace('-', ' ')}</span>
+                    <span className="text-xs font-black uppercase tracking-widest opacity-50">
+                      Best: {gameProgress.highScore}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 h-2 bg-black/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-1000"
+                        style={{ width: `${Math.min(100, (gameProgress.currentLevel / 10) * 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-bold opacity-70">Lv. {gameProgress.currentLevel}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

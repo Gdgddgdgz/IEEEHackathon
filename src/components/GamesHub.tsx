@@ -51,93 +51,123 @@ export function GamesHub() {
   };
 
   if (selectedGame) {
-    return renderGame();
+    return (
+      /* Ensures the specific game also fills the screen */
+      <div className="w-full min-h-screen" style={{ background: 'var(--background)' }}>
+        {renderGame()}
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen p-4 max-w-screen-lg mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl mb-2">Learning Games</h1>
-        <p className="text-gray-600">Choose a game to start your learning journey</p>
-      </div>
+    /* OUTER CONTAINER: Forces background color to all 4 edges of the screen */
+    <div className="w-full min-h-screen m-0 p-0 transition-colors duration-300" style={{ background: 'var(--background)' }}>
+      
+      {/* INNER CONTENT: Centers the content but allows background to bleed to edges */}
+      <div className="max-w-screen-lg mx-auto p-6 pb-32">
+        
+        <div className="mb-10 pt-4">
+          <h1 className="text-4xl font-black mb-2 tracking-tight" style={{ color: 'var(--foreground)' }}>
+            Learning Games
+          </h1>
+          <p className="text-lg font-medium opacity-70" style={{ color: 'var(--foreground)' }}>
+            Choose a quest to build your skills
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {GAMES_LIST.map((game) => {
-          const isLocked = progress.level < game.unlockLevel;
-          const gameProgress = progress.gamesProgress[game.id];
-          
-          return (
-            <button
-              key={game.id}
-              onClick={() => !isLocked && setSelectedGame(game.id)}
-              disabled={isLocked}
-              className={`relative bg-white rounded-2xl p-6 shadow-lg text-left transition-all ${
-                isLocked
-                  ? 'opacity-60 cursor-not-allowed'
-                  : 'hover:shadow-xl active:scale-95 cursor-pointer'
-              }`}
-            >
-              {/* Lock Overlay */}
-              {isLocked && (
-                <div className="absolute top-4 right-4">
-                  <div className="bg-gray-200 rounded-full p-2">
-                    <Lock className="w-5 h-5 text-gray-600" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {GAMES_LIST.map((game) => {
+            const isLocked = progress.level < game.unlockLevel;
+            const gameProgress = progress.gamesProgress[game.id];
+            
+            return (
+              <button
+                key={game.id}
+                onClick={() => !isLocked && setSelectedGame(game.id)}
+                disabled={isLocked}
+                className={`relative rounded-3xl p-8 shadow-xl text-left transition-all border ${
+                  isLocked
+                    ? 'opacity-50 grayscale cursor-not-allowed'
+                    : 'hover:shadow-2xl hover:-translate-y-1 active:scale-95 cursor-pointer'
+                }`}
+                style={{ 
+                  background: 'var(--card)', 
+                  color: 'var(--foreground)', 
+                  borderColor: 'var(--border)' 
+                }}
+              >
+                {/* Lock Overlay */}
+                {isLocked && (
+                  <div className="absolute top-6 right-6">
+                    <div className="bg-black/10 rounded-full p-2 backdrop-blur-sm">
+                      <Lock className="w-5 h-5 opacity-60" />
+                    </div>
                   </div>
+                )}
+
+                {/* Game Icon */}
+                <div className={`w-16 h-16 ${game.color} rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg`}>
+                  {iconMap[game.icon]}
                 </div>
-              )}
 
-              {/* Game Icon */}
-              <div className={`w-14 h-14 ${game.color} rounded-2xl flex items-center justify-center text-white mb-4`}>
-                {iconMap[game.icon]}
-              </div>
+                {/* Game Info */}
+                <h3 className="text-2xl font-bold mb-2">{game.name}</h3>
+                <p className="opacity-60 text-sm mb-6 leading-relaxed">{game.description}</p>
 
-              {/* Game Info */}
-              <h3 className="text-xl mb-2">{game.name}</h3>
-              <p className="text-gray-600 text-sm mb-4">{game.description}</p>
-
-              {/* Progress Bar */}
-              {gameProgress && !isLocked && (
-                <div className="mb-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-500">Level {gameProgress.currentLevel}</span>
-                    <span className="text-xs text-gray-500">High Score: {gameProgress.highScore}</span>
+                {/* Progress Bar (Only show if unlocked and has progress) */}
+                {!isLocked && (
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest opacity-50">
+                        Lv. {gameProgress?.currentLevel || 1}
+                      </span>
+                      <span className="text-[10px] font-black uppercase tracking-widest opacity-50">
+                        Best: {gameProgress?.highScore || 0}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-black/10 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${game.color}`}
+                        style={{ width: `${Math.min(100, ((gameProgress?.currentLevel || 1) / 10) * 100)}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${game.color}`}
-                      style={{ width: `${Math.min(100, (gameProgress.currentLevel / 10) * 100)}%` }}
-                    />
+                )}
+
+                {/* Unlock Status / Play Button */}
+                {isLocked ? (
+                  <div className="text-xs font-black uppercase tracking-widest opacity-40">
+                    Unlock at Level {game.unlockLevel}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className={`inline-flex items-center gap-2 ${game.color} text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md hover:brightness-110 transition-all`}>
+                    {t.common.play} <ArrowLeft className="w-4 h-4 rotate-180" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
-              {/* Unlock Level */}
-              {isLocked && (
-                <div className="text-sm text-gray-500">
-                  Unlock at Level {game.unlockLevel}
-                </div>
-              )}
-
-              {/* Play Button */}
-              {!isLocked && (
-                <div className={`inline-block ${game.color} text-white px-4 py-2 rounded-lg text-sm`}>
-                  {t.common.play} →
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Tips Section */}
-      <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
-        <h2 className="text-xl mb-3">Learning Tips</h2>
-        <ul className="space-y-2 text-gray-700">
-          <li>• Play different games to develop all skills</li>
-          <li>• Practice daily to maintain your streak</li>
-          <li>• Don't worry about mistakes - they help you learn!</li>
-          <li>• Unlock new games by leveling up</li>
-        </ul>
+        {/* Tips Section - Professional Card Style */}
+        <div 
+          className="mt-12 rounded-[32px] p-8 border shadow-lg" 
+          style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+        >
+          <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--foreground)' }}>Pro Tips 💡</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/10">
+                <p className="text-sm font-medium opacity-80" style={{ color: 'var(--foreground)' }}>
+                  • Play different games to develop all skill areas equally.
+                </p>
+             </div>
+             <div className="p-4 rounded-2xl bg-green-500/5 border border-green-500/10">
+                <p className="text-sm font-medium opacity-80" style={{ color: 'var(--foreground)' }}>
+                  • Maintaining your daily streak earns you bonus XP multipliers.
+                </p>
+             </div>
+          </div>
+        </div>
       </div>
     </div>
   );

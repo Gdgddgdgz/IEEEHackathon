@@ -2017,3 +2017,12 @@ html {
     opacity: .5;
   }
 }
+@layer base {
+  html, body, #root {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    min-height: 100vh;
+    /* This ensures the root div is never smaller than the screen */
+  }
+}

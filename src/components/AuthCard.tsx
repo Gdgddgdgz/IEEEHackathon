@@ -25,47 +25,132 @@ export default function AuthCard({ onAuth }: { onAuth: () => void }) {
     } else {
       register(email, password);
     }
+
     onAuth();
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted">
-      <Card className="w-[360px] shadow-xl">
-        <CardContent className="p-6 space-y-4">
-          <h2 className="text-2xl font-bold text-center">Verbora</h2>
-          <p className="text-sm text-center text-muted-foreground">
-            Learn meaning, not memorization
-          </p>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background:
+          "radial-gradient(circle at top, #3b2f80, #0f0c29 70%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+        zIndex: 9999,
+      }}
+    >
+      {/* GLOW BORDER */}
+      <Card
+        style={{
+          width: "100%",
+          maxWidth: 480,
+          padding: 2,
+          borderRadius: 22,
+          background:
+            "linear-gradient(135deg, #8b5cf6, #ec4899, #22d3ee)",
+          boxShadow:
+            "0 0 40px rgba(139,92,246,0.45), 0 0 80px rgba(236,72,153,0.25)",
+        }}
+      >
+        {/* CARD BODY */}
+        <div
+          style={{
+            background: "linear-gradient(180deg, #1b1b3a, #141432)",
+            borderRadius: 20,
+          }}
+        >
+          <CardContent style={{ padding: 32, color: "white" }}>
+            {/* Title */}
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <h2
+                style={{
+                  fontSize: 32,
+                  fontWeight: 800,
+                  letterSpacing: 1,
+                }}
+              >
+                VERBORA
+              </h2>
+              <p style={{ opacity: 0.7 }}>
+                Learn meaning, not memorization
+              </p>
+            </div>
 
-          <Input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+            {/* Inputs */}
+            <div style={{ display: "grid", gap: 14 }}>
+              <Input
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  background: "#0f172a",
+                  color: "white",
+                  height: 44,
+                }}
+              />
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  background: "#0f172a",
+                  color: "white",
+                  height: 44,
+                }}
+              />
+            </div>
 
-          {error && (
-            <p className="text-sm text-red-500 text-center">{error}</p>
-          )}
+            {error && (
+              <p
+                style={{
+                  color: "#f87171",
+                  textAlign: "center",
+                  marginTop: 12,
+                }}
+              >
+                {error}
+              </p>
+            )}
 
-          <Button className="w-full" onClick={handleSubmit}>
-            {isLogin ? "Login" : "Register"}
-          </Button>
+            {/* Main Button */}
+            <Button
+              onClick={handleSubmit}
+              style={{
+                width: "100%",
+                height: 48,
+                marginTop: 24,
+                fontSize: 16,
+                fontWeight: 700,
+                background:
+                  "linear-gradient(135deg, #8b5cf6, #ec4899)",
+                boxShadow:
+                  "0 10px 30px rgba(236,72,153,0.4)",
+              }}
+            >
+              {isLogin ? "START GAME" : "CREATE PLAYER"}
+            </Button>
 
-          <p
-            className="text-xs text-center cursor-pointer text-primary"
-            onClick={() => setIsLogin(!isLogin)}
-          >
-            {isLogin
-              ? "New user? Create an account"
-              : "Already have an account? Login"}
-          </p>
-        </CardContent>
+            {/* Switch */}
+            <Button
+              variant="ghost"
+              onClick={() => setIsLogin(!isLogin)}
+              style={{
+                width: "100%",
+                marginTop: 12,
+                color: "#c7bdfc",
+              }}
+            >
+              {isLogin
+                ? "New player? Create an account"
+                : "Already a player? Login"}
+            </Button>
+          </CardContent>
+        </div>
       </Card>
     </div>
   );

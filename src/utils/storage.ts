@@ -1,5 +1,3 @@
-// LocalStorage management for offline-first app
-
 export interface UserProgress {
   userId: string;
   name: string;
@@ -36,37 +34,44 @@ export interface GameData {
   color: string;
 }
 
-export function initializeData() {
-  // Initialize user progress if not exists
-  if (!localStorage.getItem('userProgress')) {
-    const initialProgress: UserProgress = {
-      userId: 'student1',
-      name: 'Student',
-      avatar: 1,
-      dailyStreak: 0,
-      lastLoginDate: '',
-      totalScore: 0,
-      level: 1,
-      skills: {
-        vocabulary: 0,
-        logic: 0,
-        creativity: 0,
-        speed: 0,
-      },
-      badges: [],
-      gamesProgress: {},
-      completedDays: [],
-    };
-    localStorage.setItem('userProgress', JSON.stringify(initialProgress));
-  }
+// Default data used for new users or if storage is empty
+const DEFAULT_PROGRESS: UserProgress = {
+  userId: 'student1',
+  name: 'Student',
+  avatar: 1,
+  dailyStreak: 0,
+  lastLoginDate: '',
+  totalScore: 0,
+  level: 1,
+  skills: {
+    vocabulary: 0,
+    logic: 0,
+    creativity: 0,
+    speed: 0,
+  },
+  badges: [],
+  gamesProgress: {},
+  completedDays: [],
+};
 
-  // Update daily streak
+export function initializeData() {
+  if (!localStorage.getItem('userProgress')) {
+    localStorage.setItem('userProgress', JSON.stringify(DEFAULT_PROGRESS));
+  }
   updateDailyStreak();
 }
 
+/**
+ * FIXED: This function now always returns a UserProgress object.
+ * If no data exists, it returns the DEFAULT_PROGRESS.
+ */
 export function getUserProgress(): UserProgress {
   const data = localStorage.getItem('userProgress');
-  return data ? JSON.parse(data) : null;
+  try {
+    return data ? JSON.parse(data) : DEFAULT_PROGRESS;
+  } catch (e) {
+    return DEFAULT_PROGRESS;
+  }
 }
 
 export function saveUserProgress(progress: UserProgress) {
@@ -75,8 +80,6 @@ export function saveUserProgress(progress: UserProgress) {
 
 export function updateDailyStreak() {
   const progress = getUserProgress();
-  if (!progress) return;
-
   const today = new Date().toDateString();
   const lastLogin = progress.lastLoginDate;
 
@@ -84,8 +87,6 @@ export function updateDailyStreak() {
     const yesterday = new Date(Date.now() - 86400000).toDateString();
     if (lastLogin === yesterday) {
       progress.dailyStreak += 1;
-    } else if (lastLogin !== '') {
-      progress.dailyStreak = 1;
     } else {
       progress.dailyStreak = 1;
     }
@@ -96,7 +97,6 @@ export function updateDailyStreak() {
 
 export function updateGameProgress(gameId: string, level: number, score: number) {
   const progress = getUserProgress();
-  if (!progress) return;
 
   if (!progress.gamesProgress[gameId]) {
     progress.gamesProgress[gameId] = {
@@ -113,14 +113,11 @@ export function updateGameProgress(gameId: string, level: number, score: number)
   gameProgress.lastPlayed = new Date().toISOString();
 
   progress.totalScore += score;
-  
   saveUserProgress(progress);
 }
 
 export function addBadge(badgeId: string) {
   const progress = getUserProgress();
-  if (!progress) return;
-
   if (!progress.badges.includes(badgeId)) {
     progress.badges.push(badgeId);
     saveUserProgress(progress);
@@ -129,11 +126,8 @@ export function addBadge(badgeId: string) {
 
 export function updateSkill(skillType: keyof UserProgress['skills'], points: number) {
   const progress = getUserProgress();
-  if (!progress) return;
-
   progress.skills[skillType] = Math.min(100, progress.skills[skillType] + points);
   
-  // Level up based on total skill points
   const totalSkills = Object.values(progress.skills).reduce((a, b) => a + b, 0);
   progress.level = Math.floor(totalSkills / 50) + 1;
   
@@ -142,8 +136,6 @@ export function updateSkill(skillType: keyof UserProgress['skills'], points: num
 
 export function markDayCompleted(day: number) {
   const progress = getUserProgress();
-  if (!progress) return;
-
   if (!progress.completedDays.includes(day)) {
     progress.completedDays.push(day);
     saveUserProgress(progress);

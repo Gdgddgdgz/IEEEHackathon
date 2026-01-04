@@ -101,26 +101,7 @@ export function SettingsPage({ isTeacherMode, setIsTeacherMode, dark, setDark, o
             </button>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="mb-1">Dark Mode</h3>
-              <p className="text-sm text-gray-600">
-                Save battery on low-end devices
-              </p>
-            </div>
-            <button
-              onClick={() => setDark && setDark(!dark)}
-              className={`w-14 h-7 rounded-full transition-all ${
-                dark ? 'bg-indigo-500' : 'bg-gray-300'
-              }`}
-            >
-              <div
-                className={`w-6 h-6 bg-white rounded-full transition-all ${
-                  dark ? 'translate-x-7' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
+
               {/* Logout Button */}
               {onLogout && (
                 <div className="flex justify-end mt-8">
